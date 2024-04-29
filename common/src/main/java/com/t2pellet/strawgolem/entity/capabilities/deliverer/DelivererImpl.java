@@ -34,15 +34,15 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
 
     protected DelivererImpl(E e) {
         super(e);
-        level = entity.level.dimension().location();
+        level = entity.level().dimension().location();
     }
 
     @Override
     public BlockPos getDeliverPos() {
         // Clear memory if we change dimensions
-        if (!entity.level.dimension().location().equals(level)) {
+        if (!entity.level().dimension().location().equals(level)) {
             tree = new Octree(new AABB(Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 1, Integer.MIN_VALUE + 1, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
-            level = entity.level.dimension().location();
+            level = entity.level().dimension().location();
         }
         BlockPos query = entity.blockPosition();
         int range = StrawgolemConfig.Harvesting.harvestRange.get();
@@ -50,7 +50,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         Optional<BlockPos> pos = chestsInRange.stream().filter((p) -> VisibilityUtil.canSee(entity, p)).min(Comparator.comparingInt(p -> p.distManhattan(query)));
         if (pos.isPresent()) {
             BlockPos cachedPos = pos.get();
-            if (ContainerUtil.isContainer(entity.level, cachedPos)) {
+            if (ContainerUtil.isContainer(entity.level(), cachedPos)) {
                 return cachedPos;
             } else tree.remove(cachedPos);
         } else return scanForDeliverable(query);
@@ -63,7 +63,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
             for (int y = -12; y <= 12; ++y) {
                 for (int z = -24; z <= 24; ++z) {
                     BlockPos pos = query.offset(x, y, z);
-                    if (ContainerUtil.isContainer(entity.level, pos) && VisibilityUtil.canSee(entity, pos)) {
+                    if (ContainerUtil.isContainer(entity.level(), pos) && VisibilityUtil.canSee(entity, pos)) {
                         tree.insert(pos);
                         return pos;
                     }
@@ -79,8 +79,8 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         // Need an item to deliver
         if (!stack.isEmpty()) {
             // Deliver what we can to the container if it exists
-            if (ContainerUtil.isContainer(entity.level, pos)) {
-                Container container = (Container) entity.level.getBlockEntity(pos);
+            if (ContainerUtil.isContainer(entity.level(), pos)) {
+                Container container = (Container) entity.level().getBlockEntity(pos);
                 for (int i = 0; i < container.getContainerSize(); ++i) {
                     ItemStack containerStack = container.getItem(i);
                     if (containerStack.isEmpty()) {
@@ -95,12 +95,12 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
                     if (stack.isEmpty()) break;
                 }
                 // Interactions
-                entity.level.gameEvent(entity, GameEvent.CONTAINER_OPEN, pos);
-                entity.level.playSound(null, pos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                entity.level.gameEvent(entity, GameEvent.CONTAINER_CLOSE, pos);
+                entity.level().gameEvent(entity, GameEvent.CONTAINER_OPEN, pos);
+                entity.level().playSound(null, pos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                entity.level().gameEvent(entity, GameEvent.CONTAINER_CLOSE, pos);
             }
             // Drop remaining stack as ItemEntity
-            entity.level.addFreshEntity(new ItemEntity(entity.level, pos.getX(), pos.getY() + 1, pos.getZ(), stack));
+            entity.level().addFreshEntity(new ItemEntity(entity.level(), pos.getX(), pos.getY() + 1, pos.getZ(), stack));
             entity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }
     }
@@ -110,7 +110,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         ListTag positionsTag = new ListTag();
         List<BlockPos> crops = tree.getAll();
         for (BlockPos pos : crops) {
-            if (ContainerUtil.isContainer(entity.level, pos)) {
+            if (ContainerUtil.isContainer(entity.level(), pos)) {
                 positionsTag.add(NbtUtils.writeBlockPos(pos));
             }
         }
@@ -122,7 +122,7 @@ public class DelivererImpl<E extends LivingEntity & ICapabilityHaver> extends Ab
         ListTag positions = (ListTag) tag;
         for (Tag position : positions) {
             BlockPos pos = NbtUtils.readBlockPos((CompoundTag) position);
-            if (ContainerUtil.isContainer(entity.level, pos)) {
+            if (ContainerUtil.isContainer(entity.level(), pos)) {
                 tree.insert(pos);
             }
         }

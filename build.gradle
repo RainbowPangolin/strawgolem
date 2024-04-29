@@ -59,10 +59,12 @@ subprojects {
             name = 'Curse Maven'
             url = "https://www.cursemaven.com"
         }
-        repositories {
-            maven {
-                name = 'GeckoLib'
-                url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        maven {
+            name = 'GeckoLib'
+            url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+            content {
+                includeGroupByRegex("software\\.bernie.*")
+                includeGroup("com.eliotlash.mclib")
             }
         }
         maven { url 'https://repo.ryandw11.com/repository/maven-releases/' }

@@ -6,15 +6,16 @@ import com.t2pellet.strawgolem.StrawgolemConfig;
 import com.t2pellet.strawgolem.entity.StrawGolem;
 import com.t2pellet.strawgolem.entity.capabilities.decay.DecayState;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.processor.IBone;
-import software.bernie.geckolib3.geo.render.built.GeoBone;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
-import software.bernie.geckolib3.model.provider.data.EntityModelData;
-import software.bernie.geckolib3.util.RenderUtils;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.model.data.EntityModelData;
+import software.bernie.geckolib.util.RenderUtils;
+import software.bernie.geckolib.model.GeoModel;
 
-public class StrawgolemGeoModel extends AnimatedGeoModel<StrawGolem> {
 
+public class StrawgolemGeoModel extends GeoModel<StrawGolem> {
     private static final ResourceLocation modelResource = new ResourceLocation(Constants.MOD_ID, "geo/strawgolem.geo.json");
     private static final ResourceLocation animationResource = new ResourceLocation(Constants.MOD_ID, "animations/strawgolem.animation.json");
 
@@ -60,20 +61,21 @@ public class StrawgolemGeoModel extends AnimatedGeoModel<StrawGolem> {
 
 
     @Override
-    public void setCustomAnimations(StrawGolem animatable, int instanceId, AnimationEvent animationEvent) {
-        super.setCustomAnimations(animatable, instanceId, animationEvent);
-        IBone head = this.getAnimationProcessor().getBone("head");
+    public void setCustomAnimations(StrawGolem animatable, long instanceId, AnimationState<StrawGolem> customPredicate) {
+        super.setCustomAnimations(animatable, instanceId, customPredicate);
+        CoreGeoBone head = this.getAnimationProcessor().getBone("head");
 
-        EntityModelData extraData = (EntityModelData) animationEvent.getExtraDataOfType(EntityModelData.class).get(0);
+        EntityModelData extraData = (EntityModelData) customPredicate.getData(DataTickets.ENTITY_MODEL_DATA);
+
         if (head != null) {
-            head.setRotationX(extraData.headPitch * (float) Math.PI / 180);
-            head.setRotationY(extraData.netHeadYaw * (float) Math.PI / 180);
+            head.setRotX(extraData.headPitch() * (float) Math.PI / 180);
+            head.setRotY(extraData.netHeadYaw() * (float) Math.PI / 180);
         }
     }
 
     public void translateToHand(PoseStack poseStack) {
-        GeoBone arms = (GeoBone) getBone("arms");
-        GeoBone upper = (GeoBone) getBone("upper");
+        GeoBone arms = (GeoBone) getBone("arms").orElse(null);
+        GeoBone upper = (GeoBone) getBone("upper").orElse(null);
         RenderUtils.prepMatrixForBone(poseStack, upper);
         RenderUtils.translateAndRotateMatrixForBone(poseStack, upper);
         RenderUtils.prepMatrixForBone(poseStack, arms);

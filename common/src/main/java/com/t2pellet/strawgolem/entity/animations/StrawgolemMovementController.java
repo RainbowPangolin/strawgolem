@@ -1,13 +1,13 @@
 package com.t2pellet.strawgolem.entity.animations;
 
 import com.t2pellet.strawgolem.entity.StrawGolem;
-import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib.core.object.PlayState;
 
 public class StrawgolemMovementController extends StrawgolemAnimationController {
 
     public static final String NAME = "move_controller";
 
-    private static final IAnimationPredicate<StrawGolem> PREDICATE = event -> {
+    private static final AnimationStateHandler<StrawGolem> PREDICATE = event -> {
         StrawGolem golem = event.getAnimatable();
 
         String nextAnimation;

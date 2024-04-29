@@ -17,7 +17,7 @@ public class ReturnToTetherGoal extends MoveToBlockGoal {
     public ReturnToTetherGoal(StrawGolem golem) {
         super(golem, 0.5, 24);
         this.golem = golem;
-        this.level = (ServerLevel) golem.level;
+        this.level = (ServerLevel) golem.level();
     }
 
     @Override

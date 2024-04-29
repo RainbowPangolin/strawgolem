@@ -6,6 +6,7 @@ import com.t2pellet.tlib.config.api.property.IntProperty;
 import com.t2pellet.tlib.config.api.property.ListProperty;
 import com.t2pellet.tlib.config.api.property.StringProperty;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class StrawgolemConfig extends Config {
         public static final IntProperty repairChance = new IntProperty(3, 1 ,100);
         @Entry(comment = "Item to repair the golem with. Requires restart")
         public static final StringProperty repairItem = new StringProperty("minecraft:wheat", s -> {
-            return ResourceLocation.isValidResourceLocation(s) && Registry.ITEM.containsKey(new ResourceLocation(s));
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.ITEM.containsKey(new ResourceLocation(s));
         });
     }
 
@@ -92,7 +93,7 @@ public class StrawgolemConfig extends Config {
 
     private static ListProperty<String> createBlockIDList() {
         return ListProperty.of(new ArrayList<>(), (s) -> {
-            return ResourceLocation.isValidResourceLocation(s) && Registry.BLOCK.containsKey(new ResourceLocation(s));
+            return ResourceLocation.isValidResourceLocation(s) && BuiltInRegistries.BLOCK.containsKey(new ResourceLocation(s));
         });
     }
 }

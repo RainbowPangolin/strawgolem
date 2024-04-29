@@ -14,7 +14,7 @@ public class GolemBeShyGoal extends AvoidEntityGoal<Player> {
 
     @Override
     public boolean canUse() {
-        this.toAvoid = this.mob.level.getNearestPlayer(this.mob, maxDist);
+        this.toAvoid = this.mob.level().getNearestPlayer(this.mob, maxDist);
         if (this.toAvoid == null || toAvoid.isHolding(StrawGolem.REPAIR_ITEM)) {
             return false;
         } else {

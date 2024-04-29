@@ -22,7 +22,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
     public HarvestCropGoal(StrawGolem golem) {
         super(golem, 0.5, StrawgolemConfig.Harvesting.harvestRange.get());
         this.golem = golem;
-        this.level = (ServerLevel) golem.level;
+        this.level = (ServerLevel) golem.level();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     public boolean canContinueToUse() {
-        return !golem.getHeldItem().has() && this.isValidTarget(this.mob.level, this.blockPos) && !golem.getHarvester().isHarvesting();
+        return !golem.getHeldItem().has() && this.isValidTarget(this.mob.level(), this.blockPos) && !golem.getHarvester().isHarvesting();
     }
 
     @Override
@@ -86,9 +86,9 @@ public class HarvestCropGoal extends MoveToBlockGoal {
 
     @Override
     protected boolean findNearestBlock() {
-        WorldCrops crops = WorldCrops.of((ServerLevel) mob.getLevel());
+        WorldCrops crops = WorldCrops.of((ServerLevel) mob.level());
         BlockPos blockPos = crops.findNearest(mob.blockPosition());
-        if (isValidTarget(mob.getLevel(), blockPos)) {
+        if (isValidTarget(mob.level(), blockPos)) {
             this.blockPos = blockPos;
             return true;
         }

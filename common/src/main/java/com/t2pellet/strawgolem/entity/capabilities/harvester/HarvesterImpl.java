@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 import java.util.List;
@@ -38,7 +39,7 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     public void harvest(BlockPos pos) {
         if (!pos.equals(harvestPos)) {
             harvestPos = pos;
-            harvestingBlock = entity.level.getBlockState(pos).getBlock() instanceof StemGrownBlock;
+            harvestingBlock = entity.level().getBlockState(pos).getBlock() instanceof StemGrownBlock;
             Services.SIDE.scheduleServer(14, this::completeHarvest);
             synchronize();
         }
@@ -62,12 +63,12 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
 
     @Override
     public void completeHarvest() {
-        if (!entity.level.isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level, harvestPos)) {
-            BlockState state = entity.level.getBlockState(harvestPos);
+        if (!entity.level().isClientSide && isHarvesting() && CropUtil.isGrownCrop(entity.level(), harvestPos)) {
+            BlockState state = entity.level().getBlockState(harvestPos);
             BlockState defaultState = state.getBlock() instanceof StemGrownBlock ? Blocks.AIR.defaultBlockState() : state.getBlock().defaultBlockState();
             entity.setItemSlot(EquipmentSlot.MAINHAND, pickupLoot(state));
             harvestCrop(harvestPos, defaultState);
-            WorldCrops.of((ServerLevel) entity.level).remove(harvestPos);
+            WorldCrops.of((ServerLevel) entity.level()).remove(harvestPos);
             // Sometimes the animation doesn't fire properly, and the client won't clear harvesting state in that case. This will clear it manually as a backup
             Services.SIDE.scheduleServer(20, this::synchronize);
         } else clear();
@@ -94,16 +95,19 @@ class HarvesterImpl<E extends Entity & ICapabilityHaver> extends AbstractCapabil
     }
 
     private void harvestCrop(BlockPos blockPos, BlockState defaultState) {
-        entity.level.destroyBlock(blockPos, false, entity);
-        entity.level.setBlockAndUpdate(blockPos, defaultState);
-        entity.level.gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(entity, defaultState));
+        entity.level().destroyBlock(blockPos, false, entity);
+        entity.level().setBlockAndUpdate(blockPos, defaultState);
+        entity.level().gameEvent(defaultState.isAir() ? GameEvent.BLOCK_DESTROY : GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(entity, defaultState));
         harvestPos = null;
         harvestingBlock = false;
     }
 
     private ItemStack pickupLoot(BlockState state) {
         if (state.getBlock() instanceof StemGrownBlock) return new ItemStack(state.getBlock().asItem(), 1);
-        LootContext.Builder builder = new LootContext.Builder((ServerLevel) entity.level).withParameter(LootContextParams.TOOL, ItemStack.EMPTY).withParameter(LootContextParams.ORIGIN, entity.position());
+        LootParams.Builder builder = new LootParams.Builder((ServerLevel) entity.level())
+                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+                .withParameter(LootContextParams.ORIGIN, entity.position());
+
         List<ItemStack> drops = state.getDrops(builder);
         Optional<ItemStack> pickupStack = drops.stream().filter((d) -> !SeedUtil.isSeed(d) || d.getItem().isEdible()).findFirst();
         return pickupStack.orElse(ItemStack.EMPTY);

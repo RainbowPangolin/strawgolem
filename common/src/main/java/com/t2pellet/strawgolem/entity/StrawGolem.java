@@ -19,6 +19,8 @@ import com.t2pellet.tlib.entity.capability.api.CapabilityManager;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -48,17 +50,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.util.GeckoLibUtil;
+//import software.bernie.geckolib3.core.manager.AnimationFactory;
+//import software.bernie.geckolib3.util.GeckoLibUtil;
 
 // TODO : Wood armor (for straw golem to protect from cow / sheep and other things)
 // TODO : Fix bug - Animation transition on world load
 // TODO : Fix bug - not always walking fully to destination
-public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilityHaver {
 
-    public static final Item REPAIR_ITEM = Registry.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
+// TODO: Was GeoAnimatable not GeoEntity
+public class StrawGolem extends AbstractGolem implements GeoEntity, ICapabilityHaver {
+    public static final Item REPAIR_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
+//    public static final Item REPAIR_ITEM = Registries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
+//    public static final Item REPAIR_ITEM = Registry.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
     private static final double WALK_DISTANCE = 0.00000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
@@ -80,7 +88,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
                 .add(Attributes.MAX_HEALTH, StrawgolemConfig.Lifespan.baseHealth.get());
     }
 
-    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+//    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 
     public StrawGolem(EntityType<? extends StrawGolem> type, Level level) {
         super(type, level);
@@ -136,7 +144,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     @Override
     public void baseTick() {
         super.baseTick();
-        if (level.isClientSide) baseClientTick();
+        if (level().isClientSide) baseClientTick();
         else baseServerTick();
         baseCommonTick();
     }
@@ -192,7 +200,8 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
 
     @Override
     public boolean isDamageSourceBlocked(DamageSource source) {
-        if (source == DamageSource.SWEET_BERRY_BUSH) return true;
+        //TODO Fix this
+//        if (source == DamageSource.SWEET_BERRY_BUSH) return true;
         return super.isDamageSourceBlocked(source);
     }
 
@@ -226,15 +235,21 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     /* Animations */
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new StrawgolemMovementController(this));
-        data.addAnimationController(new StrawgolemArmsController(this));
-        data.addAnimationController(new StrawgolemHarvestController(this));
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new StrawgolemMovementController(this));
+        controllerRegistrar.add(new StrawgolemArmsController(this));
+        controllerRegistrar.add(new StrawgolemHarvestController(this));
     }
 
+//    @Override
+//    public AnimationFactory getFactory() {
+//        return factory;
+//    }
+
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Override
-    public AnimationFactory getFactory() {
-        return factory;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 
     private double getSqrMovement() {
@@ -252,7 +267,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     }
 
     public boolean isInCold() {
-        return level.getBiome(blockPosition()).value().getBaseTemperature() < 0.15F;
+        return level().getBiome(blockPosition()).value().getBaseTemperature() < 0.15F;
     }
 
 
@@ -341,7 +356,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
     private void spawnFlyParticle() {
         Vec3 pos = position();
         Vec3 movement = getDeltaMovement();
-        level.addParticle(StrawgolemParticles.FLY_PARTICLE.get(), pos.x, pos.y + 0.15F, pos.z, movement.x, movement.y + 0.15F, movement.z);
+        level().addParticle(StrawgolemParticles.FLY_PARTICLE.get(), pos.x, pos.y + 0.15F, pos.z, movement.x, movement.y + 0.15F, movement.z);
     }
 
     private void spawnHappyParticle() {
@@ -349,7 +364,7 @@ public class StrawGolem extends AbstractGolem implements IAnimatable, ICapabilit
         Vec3 movement = getDeltaMovement();
         double x = random.nextFloat() + pos.x - 0.5F;
         double z = random.nextFloat() + pos.z - 0.5F;
-        level.addParticle(ParticleTypes.HAPPY_VILLAGER, x, pos.y + 0.85F, z, movement.x, movement.y, movement.z);
+        level().addParticle(ParticleTypes.HAPPY_VILLAGER, x, pos.y + 0.85F, z, movement.x, movement.y, movement.z);
     }
 
 }

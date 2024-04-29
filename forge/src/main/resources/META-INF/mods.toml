@@ -23,7 +23,7 @@ side = "BOTH" # Side this dependency is applied on - 'BOTH', 'CLIENT' or 'SERVER
 [[dependencies.strawgolem]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19,1.19.2)"
+versionRange = "[1.20, 1.20.4)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.strawgolem]]
@@ -33,7 +33,7 @@ versionRange = "*"
 ordering = "BEFORE"
 side = "BOTH"
 [[dependencies.strawgolem]]
-modId = "geckolib3"
+modId = "geckolib"
 mandatory = true
 versionRange = "*"
 ordering = "BEFORE"
