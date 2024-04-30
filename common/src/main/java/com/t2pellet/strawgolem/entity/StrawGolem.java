@@ -17,10 +17,8 @@ import com.t2pellet.strawgolem.registry.StrawgolemSounds;
 import com.t2pellet.tlib.Services;
 import com.t2pellet.tlib.entity.capability.api.CapabilityManager;
 import com.t2pellet.tlib.entity.capability.api.ICapabilityHaver;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -51,12 +49,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.StemGrownBlock;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
-//import software.bernie.geckolib3.core.manager.AnimationFactory;
-//import software.bernie.geckolib3.util.GeckoLibUtil;
 
 // TODO : Wood armor (for straw golem to protect from cow / sheep and other things)
 // TODO : Fix bug - Animation transition on world load
@@ -65,8 +60,6 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 // TODO: Was GeoAnimatable not GeoEntity
 public class StrawGolem extends AbstractGolem implements GeoEntity, ICapabilityHaver {
     public static final Item REPAIR_ITEM = BuiltInRegistries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
-//    public static final Item REPAIR_ITEM = Registries.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
-//    public static final Item REPAIR_ITEM = Registry.ITEM.get(new ResourceLocation(StrawgolemConfig.Lifespan.repairItem.get()));
     private static final double WALK_DISTANCE = 0.00000001D;
     private static final double RUN_DISTANCE = 0.003D;
 
@@ -87,8 +80,6 @@ public class StrawGolem extends AbstractGolem implements GeoEntity, ICapabilityH
                 .add(Attributes.MOVEMENT_SPEED, 0.23)
                 .add(Attributes.MAX_HEALTH, StrawgolemConfig.Lifespan.baseHealth.get());
     }
-
-//    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 
     public StrawGolem(EntityType<? extends StrawGolem> type, Level level) {
         super(type, level);
@@ -200,7 +191,7 @@ public class StrawGolem extends AbstractGolem implements GeoEntity, ICapabilityH
 
     @Override
     public boolean isDamageSourceBlocked(DamageSource source) {
-        //TODO Fix this
+        //TODO find a new way to prevent damage from berry bushes
 //        if (source == DamageSource.SWEET_BERRY_BUSH) return true;
         return super.isDamageSourceBlocked(source);
     }
@@ -240,11 +231,6 @@ public class StrawGolem extends AbstractGolem implements GeoEntity, ICapabilityH
         controllerRegistrar.add(new StrawgolemArmsController(this));
         controllerRegistrar.add(new StrawgolemHarvestController(this));
     }
-
-//    @Override
-//    public AnimationFactory getFactory() {
-//        return factory;
-//    }
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     @Override
