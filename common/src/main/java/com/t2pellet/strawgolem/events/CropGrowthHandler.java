@@ -13,7 +13,7 @@ public class CropGrowthHandler {
     }
 
     public static void onCropGrowth(ServerLevel world, BlockPos cropPos) {
-        System.out.println("crop grown at pos: " + cropPos.toShortString());
+//        System.out.println("crop grown at pos: " + cropPos.toShortString());
         WorldCrops.of(world).add(cropPos);
     }
 }

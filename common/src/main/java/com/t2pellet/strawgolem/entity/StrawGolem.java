@@ -191,8 +191,7 @@ public class StrawGolem extends AbstractGolem implements GeoEntity, ICapabilityH
 
     @Override
     public boolean isDamageSourceBlocked(DamageSource source) {
-        //TODO find a new way to prevent damage from berry bushes
-//        if (source == DamageSource.SWEET_BERRY_BUSH) return true;
+        if (source.type().msgId().equals("sweetBerryBush")) return true;
         return super.isDamageSourceBlocked(source);
     }
 
